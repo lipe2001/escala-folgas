@@ -1,0 +1,66 @@
+{% block sidebar %}
+
+{% set navigation_bar = [
+('/', 'index', 'Folgas', 'fa-house'),
+('/weekend', 'weekend', 'Plantão', 'fa-calendar'),
+('/employees', 'employees', 'Funcionários', 'fa-users'),
+] -%}
+{% set active_page = active_page|default('index') -%}
+
+
+
+<nav class="bg-white shadow-xl p-2">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex h-16 items-center justify-between">
+      <div class="flex items-center w-full justify-between">
+          <img src="/static/logo_nova.png" alt="Micks" class="size-8" />
+
+        <div class="flex justify-between w-full">
+          <div class="ml-10 flex items-baseline justify-between space-x-4 w-full">
+            <div>
+
+
+            {% for href, id, caption, icon in navigation_bar %}
+            <a href="{{ href|e }}"
+              class=" {% if id != 'index' %}login{% endif %} px-3 py-2 rounded-md text-sm font-medium {% if id == active_page %}bg-indigo-500 text-white{% else %}text-gray-700 hover:bg-gray-200{% endif %}"
+              aria-current="{% if id == active_page %}page{% else %}false{% endif %}"><i
+                class="fa-solid {{ icon }}"></i> {{ caption|e }}</a>
+            {% endfor %}
+          </div>
+              
+                      <a href="/login"
+              class="px-3 py-2 rounded-md text-sm font-medium bg-indigo-500 text-white" id="login"></a>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+const secret = localStorage.getItem("token");
+const loginLink = document.getElementById("login");
+const loginList = document.getElementsByClassName("login");
+if (secret) {
+    loginLink.innerHTML = '<i class="fa-solid fa-right-from-bracket"></i> Sair';
+    loginLink.href = "#";
+    loginLink.onclick = () => {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+    };
+    for (let i = 0; i < loginList.length; i++) {
+        loginList[i].classList.remove("hidden");
+    }
+} else {
+    loginLink.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Entrar';
+    loginLink.href = "/login";
+    for (let i = 0; i < loginList.length; i++) {
+        loginList[i].classList.add("hidden");
+    }
+
+}
+
+</script>
+{%- endblock %}

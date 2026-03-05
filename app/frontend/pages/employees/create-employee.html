@@ -1,0 +1,43 @@
+{% extends "/components/base.html"%} {% block title %}Gerenciar Funcionários{% endblock
+%}
+{% set active_page = "employees" %}
+{% block content %} {% include "/components/header.html" %}
+
+<div class="min-h-screen">
+  <main class="flex h-full p-4 sm:px-6 lg:px-8">
+    <section class="mx-auto w-11/12 rounded-2xl">
+      <div class="relative w-6/12 mx-auto overflow-x-auto rounded-2xl shadow-xl p-4">
+        <div class="flex justify-center flex-col p-4 m-4">
+          <h2 class="bg-white text-2xl text-center font-bold">Novo Funcionário</h2>
+
+          <form action="/employees/create" method="POST" class="flex justify-center flex-col gap-4 p-4 m-4">
+            <label for="name" class="ml-4 font-bold">Nome Completo:</label>
+            <input type="text" id="name" name="full_name"
+              class="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <div class="grid grid-cols-2 gap-2">
+              <label for="team" class="ml-4 font-bold row-start-1">Equipe:</label>
+              <select id="team" name="team"
+                class=" border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="A">Equipe A</option>
+                <option value="B">Equipe B</option>
+              </select>
+              <label for="role" class="ml-4 font-bold row-start-1">Função:</label>
+              <select id="role" name="role"
+                class="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="huggy">Huggy</option>
+                <option value="phone">Telefone</option>
+              </select>
+            </div>
+            <button type="submit"
+              class="m-4 px-4 py-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600">Cadastrar</button>
+
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+
+
+{% endblock %}

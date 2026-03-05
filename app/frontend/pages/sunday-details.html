@@ -1,0 +1,391 @@
+{% import 'components/day-week.html' as day %} {% extends "components/base.html"
+%}
+{% set active_page = "weekend" %}
+{% block title %}Folgas{% endblock %} {% block content %} {% include
+"components/header.html" %}
+
+<div id="modal" class="fixed inset-0 z-50 place-content-center bg-black/50 p-4 hidden" role="dialog" aria-modal="true"
+  aria-labelledby="modalTitle">
+  <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg mx-auto">
+    <h2 id="modalTitle" class="text-xl font-bold text-gray-900 sm:text-2xl">
+
+    </h2>
+
+    <div class="mt-4">
+      <p> </p>
+      <p class="text-pretty text-gray-700">
+        Tem certeza que deseja excluir as folgas geradas?
+      </p>
+    </div>
+
+    <footer class="mt-6 flex justify-end gap-2">
+      <button onclick="errorCancel()" id="modal-btn" type="button"
+        class="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200">
+        Cancelar
+      </button>
+      <form action="/batch/delete/{{id}}" method="POST">
+        <button type="submit"
+          class="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700">
+          Excluir
+        </button>
+      </form>
+    </footer>
+  </div>
+</div>
+
+<div id="modalEmp" class="fixed inset-0 z-50 place-content-center bg-black/50 p-4 hidden" role="dialog"
+  aria-modal="true" aria-labelledby="modalTitle">
+  <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg mx-auto">
+    <h2 id="modalTitle" class="text-xl font-bold text-gray-900 sm:text-2xl">
+
+    </h2>
+
+    <div class="mt-4">
+      <p> </p>
+      <p class="text-pretty text-gray-700">
+        Tem certeza que deseja excluir os funcionários associados a este plantão?
+      </p>
+    </div>
+
+    <footer class="mt-6 flex justify-end gap-2">
+      <button onclick="errorCancelEmp()" id="modal-btn" type="button"
+        class="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200">
+        Cancelar
+      </button>
+      <form action="/assign/delete/{{id}}" method="POST">
+        <button type="submit"
+          class="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700">
+          Excluir
+        </button>
+      </form>
+    </footer>
+  </div>
+</div>
+
+
+
+<span class="hidden" id="id">{{id}}</span>
+<span class="hidden" id="id_batch">{{id_batch}}</span>
+<div class="mx-auto mt-5 p-12">
+  <fieldset class="space-y-3 w-9/12 mx-auto">
+    <h2 class="py-4 text-2xl font-bold">
+      <div class="text-indigo-700 text-3xl">Dia {{days}}/{{month}}</div>
+      Funcionarios para o plantão:
+    </h2>
+
+    {% if employeer %}
+
+    <ul
+      class="flex justify-center w-full gap-3 flex-wrap text-sm font-medium text-center text-gray-500 border-b border-indigo-200 ">
+      <div class="flex flex-1 w-full justify-center gap-3">
+        <li class="me-2">
+          <a onclick="toggleMorning()" id="manha" aria-current="page"
+            class="inline-block p-4 px-6 cursor-pointer text-white bg-indigo-500 rounded-t-lg hover:text-indigo-600 hover:bg-indigo-100  transition-colors">Manhã</a>
+        </li>
+        <li class="me-2">
+          <a onclick="toggleAfternoon()" id="tarde"
+            class="inline-block cursor-pointer p-4 px-6 rounded-t-lg hover:text-indigo-600 hover:bg-indigo-100  transition-colors">Tarde</a>
+        </li>
+      </div>
+      {% if status == 'no_batch' %}
+      <a onclick="confirmDeleteEmp()"
+        class="font-medium text-red-600 px-4 py-2 border-2 border-red-500 rounded-full hover:bg-red-500 hover:text-white size-fit cursor-pointer">
+        <i class="fa-solid fa-trash"></i>
+      </a>
+      <a href="/sunday/edit/{{id}}"
+        class="p-2 px-6 shadow text-sm h-fit text-center text-indigo-600 border-2 font-bold border-indigo-500 hover:bg-indigo-500 hover:text-white rounded-full ">Editar</a>
+      {% endif %}
+    </ul>
+
+
+
+
+
+
+    <div>
+      {% for e in employeer %}
+      <div
+        class="my-3 items-center justify-between gap-4 rounded border border-gray-300 p-3 font-medium shadow-sm transition-colors hover:bg-gray-50 {% if e['period'] == 'morning' %} flex morning {% else %} hidden afternoon {% endif %}">
+        <p class="text-gray-700 nomes px-4">{{e["fullName"]}}</p>
+        <p class="text-gray-700 nomes px-4">{{e["role"]}}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </fieldset>
+</div>
+<div class="bg-indigo-100 p-8 pb-32">
+  {% if status == 'draft' %}
+
+  <div class="flex w-9/12 mx-auto items-center justify-between gap-3">
+    <h2 class="py-8 px-3 text-3xl font-bold">Folgas Geradas:</h2>
+    <div class=" flex gap-3 items-center">
+      <span
+        class="rounded-full bg-white border-2 border-amber-700 px-4 py-2 size-fit text-sm font-bold whitespace-nowrap text-amber-700 ">
+        Gerado
+      </span>
+      <a onclick="confirmDelete()"
+        class="font-medium text-red-600 px-4 py-2 border-2 border-red-500 rounded-full hover:bg-red-500 hover:text-white  cursor-pointer">
+        <i class="fa-solid fa-trash"></i>
+      </a>
+      <button onclick="submitApprove()"
+        class="rounded-full bg-blue-800 px-4 py-2  cursor-pointer shadow whitespace-nowrap text-white hover:bg-blue-600">
+        Aprovar
+        </buttton>
+    </div>
+  </div>
+  {% elif status == 'approved' %}
+  <div class="flex w-9/12 mx-auto items-center justify-between gap-3">
+    <h2 class="py-8 px-3 text-3xl font-bold">Folgas Geradas:</h2>
+    <div class=" flex gap-3 items-center">
+      <span
+        class="rounded-full bg-white border-2 border-blue-700 px-4 py-2 size-fit text-sm font-bold whitespace-nowrap text-blue-700 ">
+        Aprovado
+      </span>
+      <a onclick="confirmDelete()"
+        class="font-medium text-red-600 px-4 py-2 border-2 border-red-500 rounded-full hover:bg-red-500 hover:text-white cursor-pointer">
+        <i class="fa-solid fa-trash"></i>
+      </a>
+      <button onclick="submitPublish()"
+        class="rounded-full bg-green-800 px-4 py-2  cursor-pointer shadow whitespace-nowrap text-white hover:bg-green-600">
+        Publicar
+        </buttton>
+    </div>
+  </div>
+
+
+  {% elif status == 'published' %}
+  <div class="flex w-9/12 mx-auto items-center justify-between gap-3">
+    <h2 class="py-8 px-3 text-3xl font-bold">Folgas Geradas:</h2>
+    <div class=" flex gap-3 items-center">
+      <span
+        class="rounded-full bg-white border-2 border-green-700 px-4 py-2 size-fit text-sm font-bold whitespace-nowrap text-green-700 ">
+        Publicado
+      </span>
+
+    </div>
+  </div>
+  {% endif %}
+
+
+  {% if data %}
+  <main class="h-full w-11/12 overflow-x-auto mx-auto p-4">
+    <section class="min-w-[800px] mx-auto">
+      <div class="grid grid-cols-5 text-center gap-5">
+        {% for day, items in data.items() %}
+        <div class="flex flex-col gap-2 rounded-xl">
+          <span class="mx-auto w-fit px-5 py-1 border-b mb-2 dates">{{ day }}</span>
+          {% for nv in items %}
+          <div
+            class="border-gray-50 border flex flex-col justify-center p-2 shadow {{ 'bg-blue-400 hover:bg-blue-500 transition-colors' if nv[1] == 'A' else 'bg-amber-200 hover:bg-amber-300 transition-colors' }} min-h-20 rounded">
+            <p class="font-semibold text-black capitalize">{{ nv[0] }}</p>
+            <p class="text-gray-800">Equipe {{ nv[1] }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+  {% else %}
+  {% if last_week == "published" %}
+
+  <a id="generateButton"
+    class="flex rounded-xl border-2 w-fit border-indigo-600 bg-indigo-600 px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:ring-3 focus:outline-hidden mx-auto "
+    onclick="requestPost()">
+    Gerar Folgas
+  </a>
+
+  {% else %}
+  <div class=" rounded-xl font-bold mt-5 bg-red-200 text-red-600 w-9/12 mx-auto p-4"> Você deve publicar o domingo
+    anterior antes de cadastrar o atual </div>
+  {% endif %}
+  {% endif %}
+  {% else %}
+  <a class="flex rounded-xl border w-fit border-indigo-600 bg-indigo-600 px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:ring-3 focus:outline-hidden mx-auto"
+    href="/sunday/create/{{id}}">
+    Cadastrar Funcionarios
+  </a>
+  {% endif %}
+
+</div>
+<script>
+  const listManha = document.getElementsByClassName("morning");
+  const listTarde = document.getElementsByClassName("afternoon");
+  const tarde = document.getElementById("tarde");
+  const manha = document.getElementById("manha");
+  const id = document.getElementById("id").innerText;
+  const id_batch = document.getElementById("id_batch").innerText;
+  const modal = document.getElementById("modal");
+  const modalBtn = document.getElementById("modal-btn");
+  const modalEmp = document.getElementById("modalEmp");
+
+  const secretByLocalStorage = localStorage.getItem("token");
+  if (!secretByLocalStorage) {
+    window.location.href = "/login";
+  }
+
+
+
+
+
+  const errorCancel = () => {
+    modal.classList.add("hidden");
+
+  }
+
+  const confirmDelete = () => {
+    modal.classList.remove("hidden");
+  };
+
+  const errorCancelEmp = () => {
+    modalEmp.classList.add("hidden");
+
+  }
+
+  const confirmDeleteEmp = () => {
+    modalEmp.classList.remove("hidden");
+  };
+
+  const toggleMorning = () => {
+    manha.classList.add("text-white");
+    manha.classList.add("bg-indigo-500");
+
+    tarde.classList.remove("text-white");
+    tarde.classList.remove("bg-indigo-500");
+
+    for (let i = 0; i < listTarde.length; i++) {
+      listTarde[i].classList.remove("flex");
+      listTarde[i].classList.add("hidden");
+    }
+    for (let i = 0; i < listManha.length; i++) {
+      listManha[i].classList.add("flex");
+      listManha[i].classList.remove("hidden");
+    }
+  };
+  const toggleAfternoon = () => {
+    tarde.classList.add("text-white");
+    tarde.classList.add("bg-indigo-500");
+
+    manha.classList.remove("text-white");
+    manha.classList.remove("bg-indigo-500");
+
+    for (let i = 0; i < listTarde.length; i++) {
+      listTarde[i].classList.add("flex");
+      listTarde[i].classList.remove("hidden");
+    }
+    for (let i = 0; i < listManha.length; i++) {
+      listManha[i].classList.remove("flex");
+      listManha[i].classList.add("hidden");
+    }
+  };
+
+  const submitGenerate = () => {
+    const check_id = id;
+
+    const url = `/admin/batches/${check_id}/status`;
+
+    fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": secretByLocalStorage,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status != "published") {
+          document.getElementById("generateButton").style.display = "flex";
+          document.getElementById("generateButton").disabled = true;
+          return;
+        } else {
+          requestPost();
+        }
+
+      })
+      .catch((error) => {
+        localStorage.removeItem("token")
+        window.location.href = "/login";
+      });
+
+
+  }
+  const requestPost = () => {
+    const url = `/admin/weekends/${id}/generate`;
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": secretByLocalStorage,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        window.location.reload();
+      })
+      .catch((error) => {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      });
+  };
+
+  const submitPublish = () => {
+    const url = `/admin/batches/${id_batch}/publish`;
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": secretByLocalStorage,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        window.location.reload();
+      })
+      .catch((error) => {
+        localStorage.removeItem("token")
+        window.location.href = "/login";
+      });
+  };
+
+  const submitApprove = () => {
+    const url = `/admin/batches/${id_batch}/approve`;
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": secretByLocalStorage,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        window.location.reload();
+      })
+      .catch((error) => {
+        localStorage.removeItem("token")
+        window.location.href = "/login";
+      });
+  };
+</script>
+{% endblock %}

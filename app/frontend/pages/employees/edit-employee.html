@@ -1,0 +1,80 @@
+{% extends "/components/base.html"%} {% block title %}Fim de Semana{% endblock
+%}
+{% set active_page = "employees" %}
+{% block content %} {% include "/components/header.html" %}
+
+<div class="min-h-screen">
+  <main class="flex h-full p-4 sm:px-6 lg:px-8">
+    <section class="mx-auto w-11/12 rounded-2xl">
+      <div class="relative  w-6/12 mx-auto overflow-x-auto rounded-2xl shadow-xl p-4">
+        <div class="flex justify-center flex-col p-4 m-4">
+          <h2 class="bg-white text-2xl font-bold text-center">Editar Funcionário</h2>
+
+          <form action="/employees/edit/{{employee.id}}" method="post"
+            class="flex justify-center flex-col gap-4 p-4 m-4">
+            <label for="name" class="ml-4 font-bold">Nome Completo:</label>
+            <input type="text" id="name" name="full_name" value="{{ employee.full_name }}"
+              class="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <div class="grid grid-cols-2 gap-2">
+              <label for="team" class="ml-4 font-bold row-start-1">Equipe:</label>
+              <select id="team" name="team"
+                class=" border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="A" {% if employee.team =="A" %} selected {% endif %}>Equipe A</option>
+                <option value="B" {% if employee.team =="B" %} selected {% endif %}>Equipe B</option>
+              </select>
+              <label for="role" class="ml-4 font-bold row-start-1">Função:</label>
+              <select id="role" name="role"
+                class="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="huggy" {% if employee.role=="huggy" %} selected {% endif %}>Huggy</option>
+                <option value="phone" {% if employee.role=="phone" %} selected {% endif %}>Telefone</option>
+              </select>
+            </div>
+            <div class="flex justify-center items-center gap-4 my-4">
+
+
+              <label for="is_active" class=" font-bold ">Ativo:</label>
+
+              <label class="inline-flex items-center cursor-pointer">
+                <input id="is_active" type="checkbox" name="is_active" class="sr-only peer" {% if employee.is_active %}
+                  checked {% endif %} />
+                <div
+                  class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600">
+                </div>
+              </label>
+            </div>
+
+
+
+            <button type="submit"
+              class="ml-4 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600">Salvar</button>
+
+
+          </form>
+
+
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const init_date = document.getElementById("hire_init")
+const duration = document.getElementById("hire_duration")
+const termination_date = document.getElementById("termination_date")
+init_date.addEventListener("change", (event) => {
+    let input = event.target.value;
+    let text = ""
+    let date = new Date(input);
+    if (duration.value) {
+      
+      date.setDate(date.getDate() + duration.value)
+      termination_date.innerHTML = date.toLocaleString("pt-BR", {day:"numeric", month:"numeric"})
+      termination_date.classList.remove("hidden")
+    }
+  });
+
+
+</script>
+
+          {% endblock %}

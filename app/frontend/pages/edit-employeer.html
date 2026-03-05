@@ -1,0 +1,191 @@
+{% import 'components/day-week.html' as day %} {% extends "components/base.html"
+%}
+{% set active_page = "weekend" %}
+{% block title %}Folgas{% endblock %} {% block content %} {% include
+"components/header.html" %}
+
+<div id="modal" class="fixed inset-0 z-50 place-content-center bg-black/50 p-4 hidden" role="dialog" aria-modal="true"
+  aria-labelledby="modalTitle">
+  <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+    <h2 id="modalTitle" class="text-xl font-bold text-gray-900 sm:text-2xl">
+      Erro
+    </h2>
+
+    <div class="mt-4">
+      <p class="text-pretty text-gray-700">
+        Número de funcionarios inválido para o plantão. Verifique se você
+        selecionou 4 funcionários para a manhã e 3 para a tarde.
+      </p>
+    </div>
+
+    <footer class="mt-6 flex justify-end gap-2">
+      <button id="modal-btn" type="button"
+        class="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200">
+        Cancelar
+      </button>
+    </footer>
+  </div>
+</div>
+
+<div id="modal-sucess" class="fixed inset-0 z-50 place-content-center bg-black/50 p-4 hidden" role="dialog"
+  aria-modal="true" aria-labelledby="modalTitle">
+  <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+    <h2 id="modalTitle" class="text-xl font-bold text-gray-900 sm:text-2xl">
+      Sucesso
+    </h2>
+
+    <div class="mt-4">
+      <p class="text-pretty text-gray-700">Editado com sucesso</p>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="w-9/12 mx-auto mt-20 shadow-2xl rounded-2xl p-12">
+  <div class="mx-auto">
+    <div class="flex flex-col">
+
+      <h2 class=" font-bold p-8 text-2xl">
+        Editar funcionarios delegados para o plantão:
+      </h2>
+    </div>
+  </div>
+  <span class="hidden" id="id">{{id}} </span>
+  <fieldset class="space-y-3">
+    <ul
+      class="flex justify-center gap-3 flex-wrap text-sm font-medium text-center text-gray-500 border-b border-indigo-200  dark:text-gray-400">
+      <li class="me-2">
+        <a onclick="toggleActive(0)" id="manha" aria-current="page"
+          class="inline-block p-4 px-6 cursor-pointer text-white bg-indigo-500 rounded-t-lg hover:text-indigo-600 hover:bg-indigo-100  transition-colors">Manhã</a>
+      </li>
+      <li class="me-2">
+        <a onclick="toggleActive(1)" id="tarde"
+          class="inline-block cursor-pointer p-4 px-6 rounded-t-lg hover:text-indigo-600 hover:bg-indigo-100  transition-colors">Tarde</a>
+      </li>
+    </ul>
+    {% for emp in employeer %}
+    <div>
+      <label for="{{emp['id']}}"
+        class="flex items-center justify-between gap-4 rounded border border-gray-300 p-3 text-sm font-medium shadow-sm transition-colors hover:bg-gray-50 has-checked:border-blue-600 has-checked:ring-1 has-checked:ring-blue-600 has-disabled:bg-gray-200 ">
+        <p class="text-gray-700 nomes ">{{emp['fullName']}}</p>
+        <p class="text-gray-700 nomes">{{emp['role']}}</p>
+        <input type="checkbox" name="DeliveryOption" value="{{emp['id']}}" id="{{emp['id']}}" class="sr-only valor"
+          onchange="checkNewPeople(this)" {% if emp["assigned"] %} {% if emp['period']=="morning" %} checked {% elif
+          emp["period"]=="afternoon" %} disabled {% endif %} {% endif %} />
+      </label>
+    </div>
+    {% endfor %}
+
+    <a class="flex rounded-xl border-2 w-fit border-indigo-600 bg-indigo-600 px-12 py-3 text-sm font-medium text-white hover:bg-transparent hover:text-indigo-600 focus:ring-3 focus:outline-hidden mx-auto"
+      href="#" onclick="requestPost()">
+      Salvar
+    </a>
+  </fieldset>
+</div>
+
+<script>
+  let active = 0;
+  let listActive = [[{% for emp in employeer %}{% if emp['assigned'] and emp['period'] == 'morning' %} '{{emp['id']}}', {% endif %}{% endfor %}], [{% for emp in employeer %}{% if emp['assigned'] and emp['period'] == 'afternoon' %} '{{emp['id']}}', {% endif %}{% endfor %}]];
+  let id = document.getElementById("id").innerText;
+  let listValor = document.getElementsByClassName("valor");
+  let listNomes = document.getElementsByClassName("nomes");
+  let list = [
+    document.getElementById("manha"),
+    document.getElementById("tarde"),
+  ];
+
+  const toggleActive = (id) => {
+    for (i = 0; i < list.length; i++) {
+      if (i == id) {
+        active = id;
+        list[i].classList.add("text-white");
+        list[i].classList.add("bg-indigo-500");
+      } else {
+        list[i].classList.remove("text-white");
+        list[i].classList.remove("bg-indigo-500");
+      }
+
+      for (j = 0; j < listValor.length; j++) {
+        if (listActive[i].indexOf(listValor[j].value) != -1) {
+          if (listValor[j].checked == true) {
+            listValor[j].disabled = true;
+            listValor[j].checked = false;
+          } else {
+            listValor[j].disabled = false;
+            listValor[j].checked = true;
+          }
+        }
+      }
+    }
+  };
+
+  const checkNewPeople = (e) => {
+    const MAX_FUNC = [4, 3];
+    if (listActive[active].length < MAX_FUNC[active]) {
+      if (e.checked == true) {
+        if (listActive[active].indexOf(e.value) == -1) {
+          listActive[active] = listActive[active].concat(e.value);
+        }
+      }
+    } else {
+
+      if (e.checked == true) {
+        e.checked = false;
+      }
+    }
+    if (e.checked == false) {
+      const exist = listActive[active].indexOf(e.value);
+      if (exist != -1) {
+        listActive[active].splice(exist, 1);
+      }
+    }
+  };
+  const requestPost = async () => {
+
+    const request = {
+      morning: listActive[0],
+      afternoon: listActive[1],
+    };
+    if (listActive[0].length != 4 || listActive[1].length != 3) {
+      modal.style.display = "grid";
+      return;
+    }
+    const secretByLocalStorage = localStorage.getItem("token");
+    if (!secretByLocalStorage) {
+      window.location.href = "/login";
+      return;
+    }
+    const url = `/admin/weekends/${id}/sunday-assignments`;
+    await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": secretByLocalStorage,
+      },
+      body: JSON.stringify(request),
+    })
+      .then((response) => {
+        if (response.status == 200) {
+          modalSucess.style.display = "grid";
+          window.location.href = `/sunday/${id}`;
+        } else {
+          modal.style.display = "grid";
+        }
+      })
+      .catch((error) => {
+        modal.style.display = "grid";
+      });
+
+
+  };
+
+  const modal = document.getElementById("modal");
+  const modalSucess = document.getElementById("modal-sucess");
+  const modalBtn = document.getElementById("modal-btn");
+
+  modalBtn.onclick = function () {
+    modal.style.display = "none";
+  };
+</script>
+{% endblock %}

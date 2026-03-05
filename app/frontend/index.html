@@ -1,0 +1,59 @@
+{% import 'components/day-week.html' as day %} {% extends "components/base.html"
+%}
+{% set active_page = "index" %}
+{% block title %}Folgas{% endblock %} {% block content %} {% include
+"components/header.html" %}
+<div class="min-h-screen ">
+  <header>
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+
+      <h1 class="text-3xl text-center font-bold tracking-tight text-cyan-900">
+        <a class="text-2xl p-2 rounded cursor-pointer hover:bg-sky-100 transition-all"
+          href="/?position={{position-1}}"><i class="fa-solid fa-caret-left"></i></a>
+        {{month}}
+        <a class="text-2xl p-2 rounded cursor-pointer hover:bg-sky-100 transition-all"
+          href="/?position={{position+1}}"><i class="fa-solid fa-caret-right"></i></a>
+      </h1>
+    </div>
+  </header>
+
+  <main class="h-full  overflow-x-auto mx-auto w-11/12 p-4">
+    <section class=" min-w-[700px] mx-auto ">
+      <div class="grid grid-cols-5 text-center gap-5">
+        {% for d in data %} {{ day.dayweek(week[loop.index0]["day"] ,
+        week[loop.index0]["week"], d ) }}
+        {% else %}
+
+        <div class="p-4 bg-red-400 text-white rounded row-start-2 col-start-2 col-span-3">Nenhuma folga cadastrada.
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+let hj = new Date();
+const hoje = hj.getDay() - 1;
+const day = hj.getDate();
+
+let week = [
+"Segunda-Feira",
+"Terça-Feira",
+"Quarta-Feira",
+"Quinta-Feira",
+"Sexta-Feira",
+];
+
+const listDay = document.getElementsByClassName("dates");
+for (const days of listDay) {
+if (days.innerHTML.indexOf(day) != -1) {
+days.classList.add("text-sky-500");
+days.classList.add("font-bold");
+} else {
+days.classList.remove("text-sky-500");
+days.classList.remove("font-bold");
+}
+}
+</script>
+
+{% endblock %}

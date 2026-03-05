@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+psycopg[binary]
+psycopg_pool
+pydantic>=2
+pydantic-settings
+python-dateutil
+python-multipart
+jinja2
+python-telegram-bot
+PyJWT

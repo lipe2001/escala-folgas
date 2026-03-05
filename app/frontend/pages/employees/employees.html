@@ -1,0 +1,190 @@
+{% extends "/components/base.html"%} {% block title %}Fim de Semana{% endblock
+%}
+{% set active_page = "employees" %}
+{% block content %} {% include "/components/header.html" %}
+
+
+<div id="modal" class="fixed inset-0 z-50 place-content-center bg-black/50 p-4 hidden" role="dialog" aria-modal="true"
+  aria-labelledby="modalTitle">
+  <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg mx-auto">
+    <h2 id="modalTitle" class="text-xl font-bold text-gray-900 sm:text-2xl">
+
+    </h2>
+
+    <div class="mt-4">
+      <p> </p>
+      <p class="text-pretty text-gray-700">
+        Tem certeza que deseja excluir este funcionário?
+      </p>
+    </div>
+
+    <footer class="mt-6 flex justify-end gap-2">
+      <button id="modal-btn" type="button"
+        class="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200">
+        Cancelar
+      </button>
+      <button onclick="errorDelete()"
+        class="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700">
+        Excluir
+      </button>
+    </footer>
+  </div>
+</div>
+
+<div id="modal-error" class="fixed inset-0 z-50 place-content-center bg-black/50 p-4 hidden" role="dialog"
+  aria-modal="true" aria-labelledby="modalTitle">
+  <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg mx-auto">
+    <h2 id="modalTitle" class="text-xl font-bold text-gray-900 sm:text-2xl">
+      Erro
+    </h2>
+
+    <div class="mt-4">
+      <p class="text-pretty text-gray-700">
+        Este funcionário está associado a um plantão em aberto.
+        Finalize-o ou o exclua antes de continuar.
+      </p>
+    </div>
+
+    <footer class="mt-6 flex justify-end gap-2">
+      <button id="modal-btn-error" type="button"
+        class="rounded bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200">
+        Cancelar
+      </button>
+
+    </footer>
+  </div>
+</div>
+
+
+
+
+<div class="min-h-screen">
+  <main class="flex h-full p-4 sm:px-6 lg:px-8">
+
+    <section class="mx-auto w-11/12 rounded-2xl">
+      <div class="relative overflow-x-auto rounded-2xl shadow-xl p-4">
+        <div class="flex justify-between p-4 m-4">
+          <h2 class="bg-white text-xl font-bold">Funcionários</h2>
+          <a href="/employees/create"
+            class="p-2 px-6 shadow text-sm font-medium text-center text-white bg-indigo-500 hover:bg-indigo-600 rounded-full">Cadastrar</a>
+        </div>
+        <table class="w-full rounded-xl text-sm text-center text-gray-500 ">
+          <thead class="text-xs text-gray-700 uppercase bg-indigo-50 rounded-2xl ">
+            <tr>
+              <th scope="col" class="px-6 py-3">Nome</th>
+              <th scope="col" class="px-6 py-3">Equipe</th>
+              <th scope="col" class="px-6 py-3">Funcão</th>
+              <th scope="col" class="px-6 py-3">Ativo</th>
+              <th scope="col" class="px-6 py-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for emp in employees %}
+            <tr class="bg-white border-t border-gray-200">
+              <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ">
+                {{emp.full_name}}
+              </th>
+              <td class="px-6 py-4 font-bold">{{emp.team}}</td>
+              <td class="px-6 py-4">{{emp.role}}</td>
+              <td class="px-6 py-4">
+                {% if emp.is_active %}
+                <p class="font-bold border w-fit mx-auto rounded-full  border-green-800 py-0.5 px-4 text-green-800">Sim
+                </p>
+                {% else %}
+                <p class="font-bold border w-fit mx-auto rounded-full border-red-800 py-0.5 px-4 text-red-800">Não</p>
+                {% endif %}
+
+              <td class="px-2 ">
+                <a onclick="editEmployee('{{emp.id}}')"
+                  class="font-medium text-indigo-600 px-4 py-2 border-2 border-indigo-500 rounded-full hover:bg-indigo-500 hover:text-white cursor-pointer">Editar</a>
+
+<!--
+                <a onclick="confirmDelete('{{emp.id}}')"
+                  class="font-medium text-red-600 px-4 py-2 border-2 border-red-500 rounded-full hover:bg-red-500 hover:text-white cursor-pointer">
+                  <i class="fa-solid fa-trash"></i>
+                </a>-->
+
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+
+  <script>
+    const modal = document.getElementById("modal");
+    const modalBtn = document.getElementById("modal-btn");
+    const modalErr = document.getElementById("modal-error");
+    const modalBtnErr = document.getElementById("modal-btn-error");
+    let id = null;
+
+    const confirmDelete = (id_v) => {
+      modal.classList.remove("hidden");
+      id = id_v;
+    }
+
+    const editEmployee = (id_v) => {
+
+      const url = `/employees/status/${id_v}`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          if (!data.assigned) {
+            window.location.href = `/employees/edit/${id_v}`;
+          } else {
+            modal.classList.add("hidden");
+            modalErr.classList.remove("hidden");
+
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching employee status:', error);
+        });
+
+    }
+
+    const errorDelete = () => {
+      const url = `/employees/status/${id}`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          if (data.assigned) {
+            modal.classList.add("hidden");
+            modalErr.classList.remove("hidden");
+          } else {
+            deleteEmployee();
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching employee status:', error);
+        });
+
+
+
+
+    }
+    const deleteEmployee = () => {
+      const url = `/employees/delete/${id}`;
+      fetch(url, {
+        method: 'POST',
+      }).then(response => {
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          console.error('Error deleting employee');
+        }
+      })
+    }
+
+
+    modalBtn.addEventListener("click", function () {
+      modal.classList.add("hidden");
+    });
+    modalBtnErr.addEventListener("click", function () {
+      modalErr.classList.add("hidden");
+    });
+  </script>
+  {% endblock %}

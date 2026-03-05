@@ -1,0 +1,72 @@
+{% extends "/components/base.html"%} {% block title %}Fim de Semana{% endblock
+%}
+{% set active_page = "weekend" %}
+{% block content %} {% include "/components/header.html" %}
+
+<div
+  class="max-w-sm flex justify-center flex-col p-6 gap-3 bg-white border m-auto mt-20 border-gray-200 rounded-lg shadow-2xl">
+  <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">
+    Cadastrar novo Sabado
+  </h5>
+
+  <input type="date" id="sabado" class="p-4 bg-gray-100 rounded-xl" value="{{new_weekend}}" />
+  <div id="erro" class="hidden px-4 py-2 text-center bg-red-100 text-red-800 rounded-lg mx-2">A data informada não é um
+    sabado</div>
+  <button id="button"
+    class="items-center cursor-pointer px-3 p-4 text-sm font-medium text-center text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 disabled:cursor-default disabled:bg-gray-400"
+    onclick="submit()">Cadastrar
+
+  </button>
+</div>
+
+<script>
+
+  const sabado = document.getElementById("sabado")
+  const error = document.getElementById("erro")
+  const button = document.getElementById("button")
+  sabado.addEventListener("change", (event) => {
+    let input = event.target.value;
+    let text = "A data informada não é sabado"
+    let date = new Date(input).getDay();
+    if (date != 5) {
+      error.classList.add("flex")
+      error.classList.remove("hidden")
+      error.innerText = text
+      button.disabled = true
+
+    } else {
+      error.classList.add("hidden")
+      error.classList.remove("flex")
+      button.disabled = false
+    }
+  });
+
+  const submit = () => {
+    let input = sabado.value;
+    let data = { saturday: input, on_duty_team: "A" };
+    const secretByLocalStorage = localStorage.getItem("token");
+    if (!secretByLocalStorage) {
+      window.location.href = "/login";
+      return;
+    }
+    fetch("/admin/weekends", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": secretByLocalStorage,
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        window.location.href = "/weekend";
+      })
+      .catch((erro) => {
+        error.classList.add("flex")
+        error.classList.remove("hidden")
+        error.innerText = "Sabado já cadastrado"
+      });
+
+  };
+</script>
+{% endblock %}
