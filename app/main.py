@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import logging
 from fastapi import Request, Response
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
@@ -10,6 +11,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, Updater
 from .bot import bot
 BASE_DIR = Path(__file__).resolve().parent
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Escalas NOC API")
 app.include_router(public.router)
@@ -29,17 +31,9 @@ async def status(id : int):
 
 @app.on_event("startup")
 async def startup_event():
-    await bot.app.initialize()
-    await bot.app.start()
-    await bot.app.updater.start_polling()
-
-
-
-    
-
-
-
-
-
-
-    
+    try:
+        await bot.app.initialize()
+        await bot.app.start()
+        await bot.app.updater.start_polling()
+    except Exception as exc:
+        logger.warning("Telegram bot não inicializado no startup: %s", exc)

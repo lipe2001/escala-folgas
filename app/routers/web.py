@@ -28,12 +28,6 @@ employee_dao = employee.EmployeeDAO()
 async def home(request: Request, position : int = 0):
     dias = defaultdict(list)
     ferias = public.folgas_week(position)
-    if not ferias:
-        if position < 0:
-            url = "/?position=" + str(position + 1)  
-        else:
-            url = "/?position=" + str(position - 1)  
-        return RedirectResponse(url=url, status_code=303)
     semana = [{"week" : "Segunda"},{"week" : "Terça"},{"week" : "Quarta"},{"week" : "Quinta"},{"week" : "Sexta"}]
     mesF = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]    
     for f in ferias:
@@ -42,11 +36,13 @@ async def home(request: Request, position : int = 0):
         semana[idx]["day"] = x.split("-")[-1]
     try:  
       list_key = list(dias.keys())
-      mes_number = list_key[2].split('-')
+      target_day = list_key[2]
+      mes_number = target_day.split('-')
       mes_nome = mesF[int(mes_number[1]) -1].capitalize()
       mes = f"{mes_nome} - {mes_number[0]}"
     except:
-      mes = ""
+      base_day = date.today() - timedelta(days=date.today().weekday()) + timedelta(weeks=int(position))
+      mes = f"{mesF[base_day.month - 1].capitalize()} - {base_day.year}"
     data = list(dias.values())
     return templates.TemplateResponse(
         request=request, name="index.html", context = {"data":data, "week" : semana, "month": mes, "position": int(position)}
@@ -279,6 +275,7 @@ async def delete_batch_post(request: Request, weekend_id : int):
     return RedirectResponse(url="/weekend", status_code=303)
 
 @router.get("/login", response_class=HTMLResponse)
+@router.get("/login/", response_class=HTMLResponse)
 async def login_page(request: Request):
 
     return templates.TemplateResponse(
@@ -286,6 +283,7 @@ async def login_page(request: Request):
     )
 
 @router.post("/login")
+@router.post("/login/")
 async def login_submit(request: Request):
     form = await request.json()
     username = form.get("username")
@@ -296,4 +294,3 @@ async def login_submit(request: Request):
     if username != USERNAME or password != PASSWORD:
         return HTMLResponse(status_code=401, content="Credentials are incorrect")
     return encodeJWT()
-    

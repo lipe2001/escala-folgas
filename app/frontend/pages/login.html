@@ -17,7 +17,7 @@
                 Entre com suas credenciais
             </p>
         </div>
-        <form id="login-form" class="mt-8 space-y-6" onsubmit="loginSubmit()">
+        <form id="login-form" class="mt-8 space-y-6" onsubmit="loginSubmit(event)">
             <div class="hidden p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800"
                 id="error-message" role="alert">
                 <div class="flex items-center">
@@ -49,7 +49,7 @@
     </div>
 </div></span>
 <script>
-    const loginSubmit = async () => {
+    const loginSubmit = async (event) => {
         event.preventDefault();
         const form = document.getElementById("login-form");
         const formData = new FormData(form);
